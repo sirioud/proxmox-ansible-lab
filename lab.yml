@@ -1,0 +1,19 @@
+---
+- name: Proxmox VE Ansible lab smoke test
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: List VMs and containers on target Proxmox node
+      community.proxmox.proxmox_vm_info:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        node: "{{ proxmox_node }}"
+        validate_certs: "{{ proxmox_validate_certs }}"
+      register: proxmox_guests
+
+    - name: Display current guest names
+      ansible.builtin.debug:
+        msg: "{{ proxmox_guests.proxmox_vms | default([]) | map(attribute='name') | list }}"

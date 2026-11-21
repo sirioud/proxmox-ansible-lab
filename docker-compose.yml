@@ -1,0 +1,17 @@
+services:
+  ansible-lab:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: proxmox-ansible-lab
+    container_name: proxmox-ansible-lab
+    working_dir: /lab
+    volumes:
+      - .:/lab
+      - ${HOME}/.proxmox_vault_pass:/run/vault_pass:ro
+    environment:
+      ANSIBLE_COLLECTIONS_PATH: /opt/ansible/collections
+      PVE_HOST: ${PVE_HOST:-192.168.1.200:8006}
+      PVE_NODE: ${PVE_NODE:-pve}
+      PVE_TOKEN_ID: ${PVE_TOKEN_ID:-ansible@pam!lab-token}
+      PVE_TOKEN_SECRET: ${PVE_TOKEN_SECRET:-}

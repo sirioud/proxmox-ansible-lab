@@ -1,0 +1,45 @@
+# Vault password files, plaintext secrets & environment files
+*.vault_pass
+.vault_pass*
+vault_pass*
+.env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+
+# Ansible runtime & temporary artifacts
+*.retry
+.ansible/
+ansible.log
+
+# Python bytecode, virtualenvs & packaging
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+*.whl
+
+# unittest & coverage outputs
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Linters & local caches
+.ruff_cache/
+.mypy_cache/
+
+# Editor, IDE & OS metadata
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db

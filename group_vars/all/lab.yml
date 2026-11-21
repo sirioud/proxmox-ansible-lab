@@ -1,0 +1,7 @@
+---
+proxmox_api_host: "192.168.1.200:8006"
+proxmox_api_user: "ansible@pam"
+proxmox_api_token_id: "ansible@pam!lab-token"
+proxmox_api_token_secret: "{{ vault_proxmox_api_token_secret }}"
+proxmox_node: "karuga"
+proxmox_validate_certs: false
