@@ -1,0 +1,49 @@
+---
+- name: Provision new Ubuntu VM from template
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    new_vmid: 150
+    new_vm_name: "test-ubuntu-01"
+    template_name: "ubuntu-2404-cloudinit-template"
+    target_node: "{{ proxmox_node }}"
+    disk_size_gb: "20G"
+    vm_memory_mb: 2048
+    vm_cores: 2
+    ci_user: "ansible"
+    ssh_public_key: "{{ lookup('file', '~/.ssh/id_rsa.pub', errors='ignore') | default('') }}"
+
+  tasks:
+    - name: Clone VM from Ubuntu 24.04 template
+      community.proxmox.proxmox_kvm:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        node: "{{ target_node }}"
+        validate_certs: "{{ proxmox_validate_certs }}"
+        clone: "{{ template_name }}"
+        newid: "{{ new_vmid }}"
+        name: "{{ new_vm_name }}"
+        full: true
+        storage: "local-lvm"
+        format: "raw"
+        cores: "{{ vm_cores }}"
+        memory: "{{ vm_memory_mb }}"
+        ciuser: "{{ ci_user }}"
+        sshkeys: "{{ ssh_public_key }}"
+        ipconfig:
+          ipconfig0: "ip=dhcp"
+        state: present
+
+    - name: Start the new VM
+      community.proxmox.proxmox_kvm:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        node: "{{ target_node }}"
+        validate_certs: "{{ proxmox_validate_certs }}"
+        vmid: "{{ new_vmid }}"
+        state: started

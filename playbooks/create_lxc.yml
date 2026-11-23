@@ -1,0 +1,52 @@
+---
+- name: Provision an LXC Container on Proxmox
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    lxc_vmid: 200
+    lxc_hostname: "lab-ct-01"
+    lxc_template: "local:vztmpl/debian-13-standard_13.6-1_amd64.tar.zst"
+    lxc_storage: "local-lvm"
+    lxc_disk_size: "8G"
+    lxc_cores: 2
+    lxc_memory: 1024
+    lxc_swap: 512
+    lxc_bridge: "vmbr0"
+    target_node: "{{ proxmox_node }}"
+    ssh_public_key: "{{ lookup('file', '~/.ssh/id_rsa.pub', errors='ignore') | default('') }}"
+
+  tasks:
+    - name: Create LXC container
+      community.proxmox.proxmox_lxc:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        node: "{{ target_node }}"
+        validate_certs: "{{ proxmox_validate_certs }}"
+        vmid: "{{ lxc_vmid }}"
+        hostname: "{{ lxc_hostname }}"
+        ostemplate: "{{ lxc_template }}"
+        storage: "{{ lxc_storage }}"
+        disk: "{{ lxc_disk_size }}"
+        cores: "{{ lxc_cores }}"
+        memory: "{{ lxc_memory }}"
+        swap: "{{ lxc_swap }}"
+        netif:
+          net0: "name=eth0,bridge={{ lxc_bridge }},ip=dhcp,type=veth"
+        pubkey: "{{ ssh_public_key }}"
+        unprivileged: true
+        onboot: false
+        state: present
+
+    - name: Start the LXC container
+      community.proxmox.proxmox_lxc:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        node: "{{ target_node }}"
+        validate_certs: "{{ proxmox_validate_certs }}"
+        vmid: "{{ lxc_vmid }}"
+        state: started
