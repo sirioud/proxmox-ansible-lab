@@ -1,0 +1,42 @@
+---
+- name: Inspect a specific Proxmox guest
+  hosts: localhost
+  gather_facts: false
+
+  vars:
+    # Target VM or Container name (default to tf-workstation, can be overridden via CLI)
+    target_guest_name: "tf-workstation"
+
+  tasks:
+    - name: Fetch all VMs and containers from Proxmox
+      community.proxmox.proxmox_vm_info:
+        api_host: "{{ proxmox_api_host }}"
+        api_user: "{{ proxmox_api_user }}"
+        api_token_id: "{{ proxmox_api_token_id }}"
+        api_token_secret: "{{ proxmox_api_token_secret }}"
+        node: "{{ proxmox_node }}"
+        validate_certs: "{{ proxmox_validate_certs }}"
+      register: proxmox_inventory
+
+    - name: Find the targeted guest
+      ansible.builtin.set_fact:
+        guest_details: "{{ proxmox_inventory.proxmox_vms | selectattr('name', 'equalto', target_guest_name) | first | default(none) }}"
+
+    - name: Fail gracefully if guest is not found
+      ansible.builtin.fail:
+        msg: "Guest '{{ target_guest_name }}' was not found on node '{{ proxmox_node }}'!"
+      when: guest_details is none
+
+    - name: Display guest status dashboard
+      ansible.builtin.debug:
+        msg:
+          - "========================================="
+          - " Name        : {{ guest_details.name }}"
+          - " VM ID       : {{ guest_details.vmid }}"
+          - " Type        : {{ guest_details.type | default('vm/lxc') }}"
+          - " Status      : {{ guest_details.status | upper }}"
+          - " vCPUs       : {{ guest_details.cpus | default(guest_details.maxcpu) }}"
+          - " Memory (MB) : {{ (guest_details.maxmem / 1024 / 1024) | round(0) }} MB"
+          - " Disk (GB)   : {{ ((guest_details.maxdisk | default(0)) / 1024 / 1024 / 1024) | round(1) }} GB"
+          - " Uptime      : {{ (guest_details.uptime / 3600) | round(1) }} hours"
+          - "========================================="
