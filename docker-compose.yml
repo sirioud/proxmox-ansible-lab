@@ -8,7 +8,7 @@ services:
     working_dir: /lab
     volumes:
       - .:/lab
-      - ${HOME}/.proxmox_vault_pass:/run/vault_pass:ro
+      - ${HOME}/.proxmox_vault_pass:/run/secrets/vault_pass.txt:ro
     environment:
       ANSIBLE_COLLECTIONS_PATH: /opt/ansible/collections
       PVE_HOST: ${PVE_HOST:-192.168.1.200:8006}
